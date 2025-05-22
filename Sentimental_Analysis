@@ -1,0 +1,78 @@
+# sentiment_analysis.py
+
+# Required Libraries
+import pandas as pd
+import re
+from bs4 import BeautifulSoup
+import contractions
+from sklearn.feature_extraction.text import CountVectorizer
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
+import string
+import nltk
+from nltk.corpus import stopwords, wordnet
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+
+# Download required NLTK resources
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('vader_lexicon')
+
+# Path to input file (change this)
+input_file = 'filename'
+
+# Read CSV
+print("Reading CSV file...")
+df = pd.read_csv(input_file)
+
+# Preprocessing
+def preprocess_text(text):
+    text = text.lower()  # lowercase
+    text = re.sub(r'[^\w\s]', '', text)  # remove punctuation
+    text = BeautifulSoup(text, 'html.parser').get_text()  # remove HTML
+    text = contractions.fix(text)  # expand contractions
+    text = ' '.join([word for word in text.split() if word.lower() not in stopwords.words('english')])
+    return text
+
+print("Preprocessing text...")
+df['cleaned_data'] = df['content'].astype(str).apply(preprocess_text)
+
+# Lemmatization
+def get_wordnet_pos(word):
+    tag = nltk.pos_tag([word])[0][1][0].upper()
+    tag_dict = {"J": wordnet.ADJ, "N": wordnet.NOUN, "V": wordnet.VERB, "R": wordnet.ADV}
+    return tag_dict.get(tag, wordnet.NOUN)
+
+def lemmatize_text(text):
+    lemmatizer = WordNetLemmatizer()
+    tokens = word_tokenize(text)
+    lemmatized = [lemmatizer.lemmatize(word, get_wordnet_pos(word)) for word in tokens]
+    return ' '.join(lemmatized)
+
+print("Lemmatizing text...")
+df['lemmatized_text'] = df['cleaned_data'].apply(lemmatize_text)
+
+# Sentiment Analysis
+print("Running sentiment analysis...")
+sid = SentimentIntensityAnalyzer()
+df['sanalysis_score'] = df['lemmatized_text'].apply(lambda x: sid.polarity_scores(x)['compound'])
+
+# Word Cloud
+print("Generating word cloud...")
+all_text = ' '.join(df['lemmatized_text'])
+wordcloud = WordCloud(width=800, height=400, background_color='white').generate(all_text)
+plt.figure(figsize=(10, 5))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off')
+plt.tight_layout()
+plt.savefig('wordcloud.png')
+plt.show()
+
+# Save output CSV
+output_file = 'processed_reviews.csv'
+df.to_csv(output_file, index=False)
+print(f"Processed data saved to: {output_file}")

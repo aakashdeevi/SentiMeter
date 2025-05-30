@@ -3,7 +3,7 @@
 **SentiMeter** is a powerful web-based sentiment analysis tool that helps you understand the emotional tone behind text content. Built with Flask and leveraging NLTK's VADER analyzer, it provides instant sentiment classification (positive, negative, or neutral) for both individual text inputs and bulk CSV file analysis.
 
 <p align="center">
-  <img src="[./Screenshot%202025-05-30%20191335.png](https://drive.google.com/file/d/1Xx4-bDslFBsegz8GeJ1QPD4-aJkvXAmM/view?usp=sharing)" alt="SentiMeter UI Screenshot" width="80%" />
+  <img src="https://drive.google.com/uc?export=view&id=1Xx4-bDslFBsegz8GeJ1QPD4-aJkvXAmM" alt="SentiMeter UI Screenshot" width="80%" />
   <br>
   <em>SentiMeter's clean, dark-themed interface with sentiment visualization</em>
 </p>
